@@ -559,7 +559,7 @@ class WarPage extends React.Component<IProps, IState> {
                                 <div style={{
                                     padding: "2rem",
                                 }}>
-                                    <h1>This war doesn't have maps</h1>
+                                    This war doesn't have maps
                                 </div>
                             ) 
                         }

@@ -47,7 +47,13 @@
     padding: 3rem;
     max-height: 150px;
     overflow-y: auto;
+    position: sticky;
+    top: 0;
+    box-shadow: 0 10px 0px rgb(0 0 0 / 30%);
     height: 150px;
+    z-index: 5;
+    border: 1px solid #dee2e6;
+    border-top: 0;
 }
 
 
