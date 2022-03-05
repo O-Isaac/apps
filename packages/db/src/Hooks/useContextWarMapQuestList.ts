@@ -1,12 +1,20 @@
-import { Quest } from '@atlasacademy/api-connector';
+import { Quest, War } from '@atlasacademy/api-connector';
 import { createContext, useState } from 'react';
 
-export function useStatesMapWar() {
+interface useStatesMapWarProps { 
+        warRoads: War.SpotRoad[]; 
+        warSpots: War.Spot[];
+}
+
+export function useStatesMapWar({ warRoads, warSpots }: useStatesMapWarProps) {
         const [show, setShow] = useState<boolean>(false);
         const [quests, setQuests] = useState<Quest.Quest[]>([]);
-        const [ isLoaded, setIsLoaded ] = useState<boolean>(true);
+        const [isLoaded, setIsLoaded] = useState<boolean>(true);
+        
+        const [roads] = useState<War.SpotRoad[]>(warRoads);
+        const [spots, setSpots] = useState<War.Spot[]>(warSpots);
 
-        return { quests, setQuests, show, setShow, isLoaded, setIsLoaded };
+        return { setSpots, spots, roads, quests, setQuests, show, setShow, isLoaded, setIsLoaded };
 }
 
 interface WarMapQuestListContextProps {
@@ -16,6 +24,8 @@ interface WarMapQuestListContextProps {
         setQuests: (quests: Quest.Quest[]) => void;
         isLoaded: boolean;
         setIsLoaded: (isLoaded: boolean) => void;
+        roads: War.SpotRoad[];
+        spots: War.Spot[];
 }
 
 export default createContext<WarMapQuestListContextProps>({
@@ -25,4 +35,6 @@ export default createContext<WarMapQuestListContextProps>({
         setQuests: () => {},
         isLoaded: true,
         setIsLoaded: () => {},
+        roads: [],
+        spots: []
 });
