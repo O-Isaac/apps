@@ -554,7 +554,7 @@ class WarPage extends React.Component<IProps, IState> {
 
                     <Tab eventKey="maps" title="Maps">
                         {hasMaps 
-                            ? (<WarMap war={war} /> ) 
+                            ? (<WarMap region={this.props.region} war={war} /> ) 
                             : (
                                 <div style={{
                                     padding: "2rem",

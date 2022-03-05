@@ -10,9 +10,9 @@
     height: 120px;
     filter: drop-shadow(2px 4px 4px rgba(0, 0, 0, 0.329));
     display: block;
-    transition: all ease 0.5s;
+    transition: all ease 0.2s;
     position: absolute;
-    zoom: 0.534;
+    zoom: 0.578;
 }
 
 .map-war-drag {
@@ -26,6 +26,30 @@
 .visibility {
     display: none;
 }
+
+.map-war-spot:hover {
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.war-warn {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    background: #fff;
+    padding: 2rem
+}
+
+.war-questList {
+    background-color: white;
+    max-width: 1140px;
+    width: 100%;
+    padding: 3rem;
+    max-height: 150px;
+    overflow-y: auto;
+    height: 150px;
+}
+
 
 /* Mobile & Ipad Devices */
 @media only screen and (max-width: 768px) {

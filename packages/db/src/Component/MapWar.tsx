@@ -1,5 +1,11 @@
-import { War } from "@atlasacademy/api-connector";
+import { War, Quest, Region } from "@atlasacademy/api-connector";
 import "./MapWar.css";
+import { Tab, Tabs } from 'react-bootstrap';
+import { faRightToBracket } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Link } from "react-router-dom";
+import { useContext, useMemo } from "react";
+import WarMapContext, { useStatesMapWar } from "../Hooks/useContextWarMapQuestList"
 
 const MAP_HIDDEN = [
     30502, // LB 5, map wihtout spot and blue background
@@ -11,45 +17,150 @@ const CCC = [
     "https://static.atlasacademy.io/NA/Terminal/QuestMap/Capter9010/MGE_901008_00.png",
 ]
 
+const CCCWarsId = [
+    9010,
+    9053,
+]
 
 
-const DragWarn = () => (
-    <div className="map-war-drag visibility">
-        Drag the map for better view
-    </div>
-)
+interface QuestListRenderProps { 
+    quests: Quest.Quest[], 
+    region: Region,
+}
+
+const QuestListRender = ({ quests, region }: QuestListRenderProps) => {
+    return (
+        <>
+            <div className="war-questList">
+                {quests && quests.map((quest, i) => (
+                    <Link key={i} to={`/${region}/quest/${quest.id}`}>
+                        <div>
+                            <FontAwesomeIcon icon={faRightToBracket} /> {quest.name}
+                        </div>
+                    </Link>
+                ))}
+            </div>
+        </>
+    )
+};
+
+interface SpotImageProps {
+    spot: War.Spot;
+    type: Quest.QuestType;
+}
+
+const SpotImage = (props: SpotImageProps) => {
+    const { spot, type } = props;
+    const { setShow, show, setQuests } = useContext(WarMapContext);
+    
+    const NameSpot = () => (
+        <div 
+                id="spot-group"
+                style={{
+                    top: spot.y + spot.questOfsY + spot.nameOfsY + 100,
+                    left: spot.x - spot.questOfsX + spot.nameOfsX - 50,
+                    height: "auto",
+                    color: "white",
+                    position: "absolute",
+                    textShadow: "4px 4px black",
+                    background: "#000000bf",
+                    borderRadius: "1rem",
+                    width: "auto",
+                    minWidth: "200px",
+                    textAlign: "center",
+                    zoom: .578   
+                }}
+                >
+                {spot.name}
+        </div>
+    )
+    
+    // Prevent Rerendering
+    const SpotImageMemorized = useMemo(() => {
+        const spotStyle = {
+            top: spot.y + spot.questOfsY + spot.nameOfsY - 20,
+            left: spot.x - spot.questOfsX + spot.nameOfsX - 20,
+            zIndex: "2",
+        }
+        
+        return (
+            <img 
+                id="spot-group"
+                alt={spot.name} 
+                src={spot.image} 
+                className="map-war-spot" 
+                style={spotStyle}
+            />
+        )
+    }, [spot]);
+
+    const handlerClick = () => {
+        setQuests(spot.quests.filter(quest => quest.type === type));
+        setShow(!show);
+    }
+    
+    return (
+       <>
+       <div onClick={handlerClick}>
+            {SpotImageMemorized}
+            <NameSpot />
+       </div>
+       </>
+    )
+}
+
+interface SpotImagesProps { 
+    spots: War.Spot[]
+    type: Quest.QuestType;
+}
+
+const SpotImages = (props: SpotImagesProps) => {
+    const { spots, type } = props;
+
+    return (
+        <>
+            {spots.map((spot, i) => (
+                <SpotImage type={type} key={i} spot={spot} />
+            ))}
+        </>
+    )
+}
 
 interface RenderSpotsProps {
     spots: War.Spot[];
     mapId: number;
+    type: Quest.QuestType;
+    region: Region
 }
 
+
 const RenderSpots = (props: RenderSpotsProps) => {
-    const { spots, mapId } = props;
-
-    const Spot = ({ spot }: { spot: War.Spot }) => (
-        <img 
-            alt={spot.name} 
-            src={spot.image} 
-            className="map-war-spot" 
-            style={{
-                top: spot.y + spot.questOfsY + spot.nameOfsY - 20,
-                left: spot.x - spot.questOfsX + spot.nameOfsX - 20,
-                zIndex: "2",
-            }}
-        />
-    )
+    const { spots, mapId, type } = props;
     
+    // const { setShow, show, setQuests } = useContext(WarMapContext);
+
     const spotFiltered = spots
-        .filter(spot => spot.mapId === mapId && spot.x < 99999 && spot.y < 99999);
+        .filter(spot => spot.mapId === mapId && spot.x < 99999 && spot.y < 99999)
+        .filter((spot) => {
 
-    
-    const spotsComponents = spotFiltered.map(spot => <Spot key={spot.id} spot={spot} />);
+            const QuestTypeFound = spot.quests.find(q => q.type === type);
+            
+            if(QuestTypeFound) return true;
 
+            return false;
+        })
+
+    if(spotFiltered.length === 0) {
+        return (
+            <div className="war-warn">
+                No has {type.toUpperCase()} QUEST
+            </div>
+        )
+    }
 
     return (
         <div className="map-war-spots">
-            {spotsComponents}
+            <SpotImages type={type} spots={spotFiltered} />
         </div>
     );
 };
@@ -66,7 +177,7 @@ const RenderMap = (props: RenderMapProps) => {
 
     return (
         <div className="map-war">
-            <img style={{ zoom: 0.534 }} height={height + 'px'} width={width + 'px'} src={image} alt="map" />
+            <img style={{ zoom: 0.578 }} height={height + 'px'} width={width + 'px'} src={image} alt="map" />
             {children}
         </div>
     );
@@ -74,29 +185,84 @@ const RenderMap = (props: RenderMapProps) => {
 
 interface MapWarProps {
     war: War.War;
+    region: Region;
 }
 
-export default function MapWar({ war }: MapWarProps) {
-    
-
+export default function MapWar({ war, region }: MapWarProps) {
     const mapsFiltered = war.maps.filter((map) => !MAP_HIDDEN.includes(map.id));
-    
-    const mapsComponents = mapsFiltered.map((map, i) => {        
-    
-        if(war.id === 9010) {
+    const { quests, setQuests, show, setShow } = useStatesMapWar();
+
+
+    const mapsComponents = mapsFiltered.map((map, i) => {
+        
+        if(CCCWarsId.includes(war.id)) {
             map.mapImage = CCC[i];
         }
 
         return (
-            <section key={i}>
-                <br />
-                <h1> { war.name } - Map #{ map.id } </h1>
-                <hr />
-                <RenderMap height={map.mapImageH} width={map.mapImageW} image={map.mapImage}>
-                    <RenderSpots spots={war.spots} mapId={map.id} />
-                    <DragWarn />
-                </RenderMap>
-            </section>
+            <WarMapContext.Provider value={{ quests, setQuests, setShow, show }}  key={i}>
+                <section  style={{ marginTop: "1rem" }}>
+                    <h1>{war.name} | #{map.id}</h1>
+                    <hr />
+                    <Tabs id={'war-map-tabs'} defaultActiveKey={'main'} mountOnEnter={false}>
+                        <Tab eventKey="main" title="Main Quests">
+                            {show && <QuestListRender quests={quests} region={region} />}
+                            <RenderMap height={map.mapImageH} width={map.mapImageW} image={map.mapImage}>
+                                <RenderSpots
+                                    region={region}
+                                    type={Quest.QuestType.MAIN} 
+                                    spots={war.spots} 
+                                    mapId={map.id} 
+                                />
+                                
+                            </RenderMap>
+                        </Tab>
+                        
+                        <Tab eventKey="free" title="Free Quests">
+                            {show && <QuestListRender quests={quests} region={region} />}
+                            <RenderMap height={map.mapImageH} width={map.mapImageW} image={map.mapImage}>
+                                <RenderSpots 
+                                    region={region}
+                                    type={Quest.QuestType.FREE} 
+                                    spots={war.spots} 
+                                    mapId={map.id} 
+                                />
+                            </RenderMap>
+                        </Tab>
+
+                        {
+                            war.eventName ? (
+                                // Show in event
+                                <Tab eventKey="event" title="Event Quests">
+                                    {show && <QuestListRender quests={quests} region={region} />}
+                                    <RenderMap height={map.mapImageH} width={map.mapImageW} image={map.mapImage}>
+                                        <RenderSpots 
+                                            region={region}
+                                            type={Quest.QuestType.EVENT}
+                                            spots={war.spots} 
+                                            mapId={map.id} 
+                                        />
+                                    </RenderMap>
+                                </Tab>
+                            ) : (
+                                // show in story
+                                <Tab eventKey="friendship" title="Interludes Quests">
+                                    {show && <QuestListRender quests={quests} region={region} />}
+                                    <RenderMap height={map.mapImageH} width={map.mapImageW} image={map.mapImage}>
+                                        <RenderSpots
+                                            region={region}
+                                            type={Quest.QuestType.FRIENDSHIP} 
+                                            spots={war.spots} 
+                                            mapId={map.id} 
+                                        />
+                                    </RenderMap>
+                                </Tab>
+                            )
+                        }
+                    </Tabs>
+                    
+                </section>
+            </WarMapContext.Provider>
         )
     })
 
