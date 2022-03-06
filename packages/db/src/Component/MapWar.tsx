@@ -1,29 +1,33 @@
 import { War, Quest, Region } from "@atlasacademy/api-connector";
 import "./MapWar.css";
-import { Tab, Tabs } from 'react-bootstrap';
-import { faRightToBracket } from "@fortawesome/free-solid-svg-icons";
+import { Tab, Tabs, Button, Dropdown } from 'react-bootstrap';
+import { faRightToBracket, faClose } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
-import { useContext, useMemo } from "react";
-import WarMapContext, { useStatesMapWar } from "../Hooks/useContextWarMapQuestList"
+import { useContext, useMemo, useState } from "react";
+import WarMapContext, { useStatesMapWar, mapResources, mapResurcesId } from "../Hooks/useContextWarMapQuestList"
 import CanvasMapWar from "./CanvasMapWar";
-
+import { useEffect } from "react";
 
 const MAP_HIDDEN = [
     30502, // LB 5, map wihtout spot and blue background
 ]
 
-const CCC = [
-    "https://static.atlasacademy.io/NA/Terminal/QuestMap/Capter9010/MGE_901001_00.png",
-    "https://static.atlasacademy.io/NA/Terminal/QuestMap/Capter9010/MGE_901003_00.png",
-    "https://static.atlasacademy.io/NA/Terminal/QuestMap/Capter9010/MGE_901008_00.png",
-]
 
-const CCCWarsId = [
-    9010,
-    9053,
-]
+const ButtonsOptions = () => {
+    const { setShowName, showName, setShowRoads, showRoads } = useContext(WarMapContext);
 
+    return (
+        <div className="buttons-options-war">
+            <Button onClick={() => setShowName(!showName)} variant="dark">
+                {showName ? "Hide" : "Show "} Names
+            </Button>
+            <Button onClick={() => setShowRoads(!showRoads)} variant="dark">
+                {showRoads ? "Hide" : "Show "} Roads (WIP)
+            </Button>
+        </div>
+    )
+}
 
 interface QuestListRenderProps { 
     quests: Quest.Quest[], 
@@ -31,16 +35,94 @@ interface QuestListRenderProps {
 }
 
 const QuestListRender = ({ quests, region }: QuestListRenderProps) => {
+    const { setShow } = useContext(WarMapContext);
+
+    const Quest = ({ quest }: { quest: Quest.Quest }) => (
+        <p>
+            <Link to={`/${region}/quest/${quest.id}`}>
+                <FontAwesomeIcon icon={faRightToBracket} /> {quest.name}
+            </Link>
+        </p>
+    )
+
+    const ScriptsPhase = ({ script }: { script: Quest.PhaseScript }) => (
+        <> 
+            <Dropdown.Item href={`/db/${region}/script/${script.scriptId}`}>
+                {`${script.scriptId.toString().slice(-2)}`}
+            </Dropdown.Item>
+        </>
+    )
+
+    const ScriptsQuest = ({ phase }: { phase: Quest.QuestPhaseScript }) => (
+        <Dropdown>
+                <Dropdown.Toggle className="war-scripts-button">
+                #{phase.phase}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                    {phase.scripts.map((script, i) => (
+                        <ScriptsPhase key={script.scriptId} script={script} />
+                    ))}
+                </Dropdown.Menu>
+        </Dropdown>
+    )
     return (
         <>
+            <div onClick={() => setShow(false)} className="war-questList-close-button">
+                <FontAwesomeIcon icon={faClose} />
+            </div>
             <div className="war-questList">
-                {quests && quests.map((quest, i) => (
-                    <Link key={i} to={`/${region}/quest/${quest.id}`}>
-                        <div>
-                            <FontAwesomeIcon icon={faRightToBracket} /> {quest.name}
+                <h3>Quests</h3>
+                <hr />
+                <section >
+                    {quests.map((quest, i) => (
+                       <div className="war-questList-innerContainer" key={i}>
+                            <div key={i} id="name">
+                                {i === 0 && (
+                                    <div className="war-questList-section-title">
+                                        <span>Name</span>
+                                    </div>
+                                )}
+                                <Quest quest={quest} />
+                            </div>
+                            <div id="scripts">
+                                {i === 0 && (
+                                    <div className="war-questList-section-title">
+                                        <span>Scripts Phases</span>
+                                    </div>
+                                )}
+                                <div className="war-scripts">
+                                    {quests && quest.phaseScripts.map((phase) => (
+                                        <ScriptsQuest key={i} phase={phase} />
+                                    ))}
+                                </div>
+                            </div>
+                       </div>
+                    ))}
+                    {/* <div id="name">
+                        <div className="war-questList-section-title">
+                            <span>Name</span>
                         </div>
-                    </Link>
-                ))}
+                        {quests && quests.map((quest, i) => (
+                            <Quest key={i} quest={quest} />
+                        ))}    
+                    </div>
+                    <div id="scripts">
+                        <div className="war-questList-section-title">
+                            <span>Scripts</span>
+                        </div>
+                        <div className="war-scripts">
+                        {quests && quests.map((quest, i) => {
+                                return quest.phaseScripts
+                                    .map((phase) => (
+                                    <p>
+                                        <ScriptsQuest key={i} phase={phase} />
+                                    </p>
+                                ))
+                        })}
+                        </div>
+                    </div>
+                   */}
+                </section>
             </div>
         </>
     )
@@ -53,25 +135,16 @@ interface SpotImageProps {
 
 const SpotImage = (props: SpotImageProps) => {
     const { spot, type } = props;
-    const { setShow, show, setQuests } = useContext(WarMapContext);
-    
+    const { setShow, show, setQuests, showName: showNameContext, lastIDspotCliked, setLastIDspotCliked } = useContext(WarMapContext);
+    const [ showName, setShowName ] = useState<boolean>(showNameContext);
+
     const NameSpot = () => (
         <div 
-            id="spot-group"
+            data-id={String(spot.id)}
+            className="spot-name"
             style={{
                 top: spot.y + spot.questOfsY + spot.nameOfsY + 100,
                 left: spot.x - spot.questOfsX + spot.nameOfsX - 50,
-                height: "auto",
-                color: "white",
-                position: "absolute",
-                textShadow: "4px 4px black",
-                background: "#000000bf",
-                borderRadius: "1rem",
-                width: "auto",
-                minWidth: "200px",
-                textAlign: "center",
-                zoom: .578,
-                zIndex: 1,
             }}>{spot.name}
         </div>
     )
@@ -86,6 +159,7 @@ const SpotImage = (props: SpotImageProps) => {
         
         return (
             <img 
+                data-id={String(spot.id)}
                 alt={spot.name} 
                 src={spot.image} 
                 className={"map-war-spot " + String(spot.id)} 
@@ -94,16 +168,36 @@ const SpotImage = (props: SpotImageProps) => {
         )
     }, [spot]);
 
-    const handlerClick = () => {
-        setQuests(spot.quests.filter(quest => quest.type === type));
-        setShow(!show);
+    const handlerClick = (event: any) => {
+        const id = event.target.dataset.id;
+        const quests = spot.quests.filter(quest => quest.type === type);
+
+        switch(true) {
+            case (id === String(lastIDspotCliked)):
+                setShow(!show);
+                setLastIDspotCliked(id);
+                setQuests(quests);
+                break;
+            default: 
+                setShow(true);
+                setLastIDspotCliked(id);
+                setQuests(quests);
+                break;
+        }
     }
+    
+    useEffect(() => {
+        setShowName(showNameContext);
+    }, [showNameContext])
+
+    const onEnterName = () => showNameContext ? null : setShowName(true)
+    const onLeaveName = () => showNameContext ? null : setShowName(false)
 
     return (
        <>
-            <div id={"spot-" + spot.id} onClick={handlerClick}>
+            <div onMouseEnter={onEnterName} onMouseLeave={onLeaveName} onClick={handlerClick}>
                 {SpotImageMemorized}
-                <NameSpot />
+                {showName && <NameSpot />}
             </div>
        </>
     )
@@ -140,10 +234,26 @@ const RenderSpots = (props: RenderSpotsProps) => {
     const spotFiltered = spots
         .filter(spot => spot.mapId === mapId && spot.x < 99999 && spot.y < 99999)
         .filter((spot) => {
-
-            const QuestTypeFound = spot.quests.find(q => q.type === type);
             
-            if(QuestTypeFound) return true;
+            if(spot.quests.length === 0) {
+
+                const filterPosition = spots.filter(srcSpot => {
+                    return srcSpot.x === spot.x && srcSpot.y === spot.y && srcSpot.id !== spot.id;
+                })
+
+                if(filterPosition.length > 0) {
+                    return false
+                }
+
+                return true
+            }
+
+            const QuestTypeFound = spot.quests.some(q => q.type === type);
+            
+            if(QuestTypeFound) {
+                // console.log('have quests:', spot)
+                return true;
+            }
 
             return false;
         })
@@ -183,6 +293,7 @@ const RenderMap = (props: RenderMapProps) => {
                 }}
                 style={{ zoom: 0.578 }} height={height + 'px'} width={width + 'px'} src={image} alt="map" />
                 {children}
+                <ButtonsOptions />
                 <CanvasMapWar mapId={mapId} spots={spots} roads={roads} height={height} width={width} />
         </figure>
     );
@@ -196,99 +307,115 @@ interface MapWarProps {
 export default function MapWar({ war, region }: MapWarProps) {
     const mapsFiltered = war.maps.filter((map) => !MAP_HIDDEN.includes(map.id));
     
-    const { roads, quests, setQuests, show, setShow, isLoaded, setIsLoaded, spots } = useStatesMapWar({
+    const contextStates = useStatesMapWar({
         warRoads: war.spotRoads,
         warSpots: war.spots,
+        defaultQuestType: Quest.QuestType.FREE,
     });
 
-    const mapsComponents = mapsFiltered.map((map, i) => {
+    const mapsComponentsQuests= mapsFiltered.map((map, i) => {
         
-        if(CCCWarsId.includes(war.id)) {
-            map.mapImage = CCC[i];
-        }
+        Object.entries(mapResurcesId).forEach(([resourceId, ids]) => {
+            if(ids.includes(war.id)) {
+                console.log(mapResources[resourceId][i])
+                map.mapImage = mapResources[resourceId][i];
+            }
+        })
+        
 
         const onSelectHandler = (e: any) => {
-            show && setShow(false);
+            contextStates.show && contextStates.setShow(false);
+            contextStates.setSetTypeQuest(e)
         }
 
-        return (
-            <WarMapContext.Provider value={{ spots, roads, quests, setQuests, setShow, show, isLoaded, setIsLoaded }}  key={i}>
-                <section  style={{ marginTop: "1rem" }}>
-                        <h1>{war.name} | #{map.id}</h1>
-                        <hr />
-                        { isLoaded ? 
-                            (
-                                <Tabs id={'war-map-tabs'} onSelect={onSelectHandler} defaultActiveKey={'main'} mountOnEnter={false}>
-                                    <Tab eventKey="main" title="Main Quests">
-                                        {show && <QuestListRender quests={quests} region={region} />}
-                                        <RenderMap mapId={map.id} height={map.mapImageH} width={map.mapImageW} image={map.mapImage}>
-                                            <RenderSpots
-                                                region={region}
-                                                type={Quest.QuestType.MAIN} 
-                                                spots={war.spots} 
-                                                mapId={map.id} 
-                                            />
-                                        </RenderMap>
-                                    </Tab>
-                                    
-                                    <Tab eventKey="free" title="Free Quests">
-                                        {show && <QuestListRender quests={quests} region={region} />}
-                                        <RenderMap mapId={map.id} height={map.mapImageH} width={map.mapImageW} image={map.mapImage}>
-                                            <RenderSpots 
-                                                region={region}
-                                                type={Quest.QuestType.FREE} 
-                                                spots={war.spots} 
-                                                mapId={map.id} 
-                                            />
-                                        </RenderMap>
-                                    </Tab>
+        const content = (
+            <WarMapContext.Provider value={contextStates}  key={i}>
+                <section style={{ marginTop: "1rem"}}>
+                <Tabs id={'quests-tabs'} onSelect={onSelectHandler} defaultActiveKey={'free'} mountOnEnter={false}>
+                    <Tab eventKey="main" title="Main Quests">
+                        {contextStates.show && <QuestListRender quests={contextStates.quests} region={region} />}
+                        <RenderMap mapId={map.id} height={map.mapImageH} width={map.mapImageW} image={map.mapImage}>
+                            <RenderSpots
+                                region={region}
+                                type={Quest.QuestType.MAIN} 
+                                spots={war.spots} 
+                                mapId={map.id} 
+                            />
+                        </RenderMap>
+                    </Tab>
 
-                                    {
-                                        war.eventName ? (
-                                            // Show in event
-                                            <Tab eventKey="event" title="Event Quests">
-                                                {show && <QuestListRender quests={quests} region={region} />}
-                                                <RenderMap mapId={map.id} height={map.mapImageH} width={map.mapImageW} image={map.mapImage}>
-                                                    <RenderSpots 
-                                                        region={region}
-                                                        type={Quest.QuestType.EVENT}
-                                                        spots={war.spots} 
-                                                        mapId={map.id} 
-                                                    />
-                                                    
-                                                        </RenderMap>
-                                            </Tab>
-                                        ) : (
-                                            // show in story
-                                            <Tab eventKey="friendship" title="Interludes Quests">
-                                                {show && <QuestListRender quests={quests} region={region} />}
-                                                <RenderMap mapId={map.id} height={map.mapImageH} width={map.mapImageW} image={map.mapImage}>
-                                                    <RenderSpots
-                                                        region={region}
-                                                        type={Quest.QuestType.FRIENDSHIP} 
-                                                        spots={war.spots} 
-                                                        mapId={map.id} 
-                                                    />
-                                                        </RenderMap>
-                                            </Tab>
-                                        )
-                                    }
-                                </Tabs>
-                            ) : (
-                                <div>
-                                    This war has not map image to view!
-                                </div>
-                            )
-                        }
-                        
+                    <Tab eventKey="free" title="Free Quests">
+                        {contextStates.show && <QuestListRender quests={contextStates.quests} region={region} />}
+                        <RenderMap mapId={map.id} height={map.mapImageH} width={map.mapImageW} image={map.mapImage}>
+                            <RenderSpots 
+                                region={region}
+                                type={Quest.QuestType.FREE} 
+                                spots={war.spots} 
+                                mapId={map.id} 
+                            />
+                        </RenderMap>
+                    </Tab>
+
+                    {
+                        war.eventName ? (
+                            // Show in event
+                            <Tab eventKey="event" title="Event Quests">
+                                {contextStates.show && <QuestListRender quests={contextStates.quests} region={region} />}
+                                <RenderMap mapId={map.id} height={map.mapImageH} width={map.mapImageW} image={map.mapImage}>
+                                    <RenderSpots 
+                                        region={region}
+                                        type={Quest.QuestType.EVENT}
+                                        spots={war.spots} 
+                                        mapId={map.id} 
+                                    />
+
+                                </RenderMap>
+                            </Tab>
+                        ) : (
+                            // show in story
+                            <Tab eventKey="friendship" title="Interludes Quests">
+                                {contextStates.show && <QuestListRender quests={contextStates.quests} region={region} />}
+                                <RenderMap mapId={map.id} height={map.mapImageH} width={map.mapImageW} image={map.mapImage}>
+                                    <RenderSpots
+                                        region={region}
+                                        type={Quest.QuestType.FRIENDSHIP} 
+                                        spots={war.spots} 
+                                        mapId={map.id} 
+                                    />
+                                </RenderMap>
+                            </Tab>
+                        )
+                    }
+                    </Tabs>  
                 </section>
             </WarMapContext.Provider>
+        )
+
+        return {
+            map: map,
+            component: content
+        }
+    })
+
+
+    const tabs = mapsComponentsQuests.map((map, i) => {
+        return (
+            <Tab eventKey={map.map.id} title={' #'+ map.map.id} key={i}>
+                {map.component}
+            </Tab>
         )
     })
 
     return (
         <>
-            {mapsComponents}
+            { contextStates.isLoaded ? (
+            <div style={{ marginTop: "1rem"}}>
+                <Tabs id={'maps-war'} mountOnEnter={false} >
+                    {tabs}
+                </Tabs>
+            </div>
+            ) : "This war doesn't have any map" }
+            
         </>
     )
 }

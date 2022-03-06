@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { War } from "@atlasacademy/api-connector";
+import { useContext } from "react";
+import ContextMapWar from "../Hooks/useContextWarMapQuestList";
 
 interface CanvasProps {
     width: number;
@@ -8,10 +10,11 @@ interface CanvasProps {
     roads: War.SpotRoad[];
     mapId: number;
 }
-
 const Canvas = ({ width, height, spots, roads, mapId }: CanvasProps) => {
+    const { showRoads, questType } = useContext(ContextMapWar);
 
     useEffect(() => {
+
         if (!canvasRef.current) {
             return;
         }
@@ -21,23 +24,38 @@ const Canvas = ({ width, height, spots, roads, mapId }: CanvasProps) => {
 
         if (context) {
             
-            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.clearRect(0, 0, canvas.width, canvas.height);            
             
-            roads.forEach(road => {
-                const start = spots.find(spot => spot.id === road.srcSpotId && spot.mapId === mapId);
-                const end = spots.find(spot => spot.id === road.dstSpotId && spot.mapId === mapId);
 
-                if (start && end) {
-                    context.beginPath();
-                    context.moveTo(start.x, start.y);
-                    context.strokeStyle = '#eb8e1c';
-                    context.lineWidth = 5;
-                    context.lineTo(end.x, end.y);
-                    context.stroke();
-                }
-            })
+            if(showRoads === true) {
+                roads
+                .forEach((road) => {                    
+                    const start = spots
+                        
+                        .find(spot => spot.id === road.srcSpotId && spot.mapId === mapId);
+
+                    const end = spots
+                        
+                        .find(spot => spot.id === road.dstSpotId && spot.mapId === mapId);
+                    
+                    
+                    if (start && end) {
+    
+                        context.beginPath();
+                        context.moveTo(start.x, start.y);                    
+                        context.strokeStyle = '#eb8e1c';
+                        context.lineWidth = 5;
+                        context.lineTo(end.x, end.y);
+                        context.stroke();
+                        
+                        return;
+                    }
+
+                })
+            }
+            
         }
-    }, [height, width, roads, spots, mapId]);
+    }, [height, width, roads, spots, mapId, showRoads, questType]);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
