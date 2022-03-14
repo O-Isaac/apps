@@ -5,7 +5,7 @@
 .map-war {
     max-width: 1140px;
     max-height: 1140px;
-    overflow: hidden;
+    overflow: scroll;
     position: relative;
     transition: all ease 0.5s;
 }
