@@ -11,6 +11,7 @@ import ErrorStatus from "../Component/ErrorStatus";
 import Loading from "../Component/Loading";
 import RarityDescriptor from "../Descriptor/RarityDescriptor";
 import Manager from "../Setting/Manager";
+import Banner from "../Component/Banner";
 
 import './ListingPage.css';
 import './ServantsPage.css';
@@ -282,122 +283,130 @@ class ServantsPage extends React.Component<IProps, IState> {
                 this.state.perPage * (this.state.page + 1)
             );
 
+        const lastServants = servants
+            .filter(servant => !servant.className.includes('beast'))
+            .slice(0, 5)
+            .map(servant => `https://static.atlasacademy.io/${Manager.region()}/CharaGraph/${servant.id}/${servant.id}b@2.png`);
+
         return (
+            <>
+            <Banner title="Servants" images={lastServants} type="images" />
             <div id="servants" className="listing-page">
-                <Row>
-                    <Col md={12} lg="auto" id="class-name">
-                        {normalClasses.map(className => {
-                            const active = this.isClassFilterActive(className);
-                            return (
-                                <span key={className}
-                                    className={'filter'}
-                                    style={{opacity: active ? 1 : 0.5}}
-                                    onClick={(ev: MouseEvent) => {
-                                        this.toggleClassFilter(className);
-                                    }}>
-                                    <ClassIcon height={37} rarity={active ? 5 : 3} className={className}/>
-                                </span>
-                            );
-                        })}
-                        <div className={"d-block d-lg-none"} style={{flexBasis: "100%", height: 0}}></div>
-                        {extraClasses.map(className => {
-                            const active = this.isClassFilterActive(className);
-                            return (
-                                <span key={className}
-                                      className={'filter'}
-                                      style={{opacity: active ? 1 : 0.5}}
-                                      onClick={(ev: MouseEvent) => {
-                                          this.toggleClassFilter(className);
-                                      }}>
-                                    <ClassIcon height={37} rarity={active ? 5 : 3} className={className}/>
-                                </span>
-                            );
-                        })}
-                    </Col>
-                    <Col sm={12} lg={3} id="servant-search">
-                        <Form>
-                            <Form.Control
-                                placeholder={'Search'}
-                                value={this.state.search ?? ''}
-                                onChange={(ev: ChangeEvent) => {
-                                    this.setState({search: ev.target.value});
-                                }}/>
-                        </Form>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col sm={12} md={6} lg={5} id="servant-rarity">
-                        <ButtonGroup>
-                            {
-                                [...new Set(this.state.servants.map(s => s.rarity))]
-                                    // deduplicate star counts
-                                    .sort((a, b) => a - b)
-                                    // sort
-                                    .map(rarity => (
-                                        <Button
-                                            variant={
-                                                this.state.activeRarityFilters.includes(rarity)
-                                                ? "success"
-                                                : "outline-dark"
-                                            }
-                                            key={rarity}
-                                            onClick={(ev: MouseEvent) => this.toggleRarityFilter(rarity)}>
-                                            {rarity} ★
-                                        </Button>
-                                    ))
-                            }
-                        </ButtonGroup>
-                    </Col>
-                    <Col sm={12} md={6} lg={7}>
-                        {this.paginator(servants.length)}
-                    </Col>
-                </Row>
-                <hr/>
+            <Row>
+                <Col md={12} lg="auto" id="class-name">
+                    {normalClasses.map(className => {
+                        const active = this.isClassFilterActive(className);
+                        return (
+                            <span key={className}
+                                className={'filter'}
+                                style={{opacity: active ? 1 : 0.5}}
+                                onClick={(ev: MouseEvent) => {
+                                    this.toggleClassFilter(className);
+                                }}>
+                                <ClassIcon height={37} rarity={active ? 5 : 3} className={className}/>
+                            </span>
+                        );
+                    })}
+                    <div className={"d-block d-lg-none"} style={{flexBasis: "100%", height: 0}}></div>
+                    {extraClasses.map(className => {
+                        const active = this.isClassFilterActive(className);
+                        return (
+                            <span key={className}
+                                className={'filter'}
+                                style={{opacity: active ? 1 : 0.5}}
+                                onClick={(ev: MouseEvent) => {
+                                    this.toggleClassFilter(className);
+                                }}>
+                                <ClassIcon height={37} rarity={active ? 5 : 3} className={className}/>
+                            </span>
+                        );
+                    })}
+                </Col>
+                <Col sm={12} lg={3} id="servant-search">
+                    <Form>
+                        <Form.Control
+                            placeholder={'Search'}
+                            value={this.state.search ?? ''}
+                            onChange={(ev: ChangeEvent) => {
+                                this.setState({search: ev.target.value});
+                            }}/>
+                    </Form>
+                </Col>
+            </Row>
+            <Row>
+                <Col sm={12} md={6} lg={5} id="servant-rarity">
+                    <ButtonGroup>
+                        {
+                            [...new Set(this.state.servants.map(s => s.rarity))]
+                                // deduplicate star counts
+                                .sort((a, b) => a - b)
+                                // sort
+                                .map(rarity => (
+                                    <Button
+                                        variant={
+                                            this.state.activeRarityFilters.includes(rarity)
+                                            ? "success"
+                                            : "outline-dark"
+                                        }
+                                        key={rarity}
+                                        onClick={(ev: MouseEvent) => this.toggleRarityFilter(rarity)}>
+                                        {rarity} ★
+                                    </Button>
+                                ))
+                        }
+                    </ButtonGroup>
+                </Col>
+                <Col sm={12} md={6} lg={7}>
+                    {this.paginator(servants.length)}
+                </Col>
+            </Row>
+            <hr/>
 
-                <Table striped bordered hover responsive>
-                    <thead>
-                    <tr>
-                        <th className="col-center">#</th>
-                        <th className="col-center">Class</th>
-                        <th className="col-center">Thumbnail</th>
-                        <th>Name</th>
-                        <th className="col-center">Rarity</th>
+            <Table striped bordered hover responsive>
+                <thead>
+                <tr>
+                    <th className="col-center">#</th>
+                    <th className="col-center">Class</th>
+                    <th className="col-center">Thumbnail</th>
+                    <th>Name</th>
+                    <th className="col-center">Rarity</th>
+                </tr>
+                </thead>
+                <tbody>
+                {results.map((servant) => {
+                    const route = `/${this.props.region}/servant/${servant.collectionNo}`;
+
+                    return <tr key={servant.id}>
+                        <td className="col-center">
+                            <Link to={route}>
+                                {servant.collectionNo} (<span className="listing-svtId" lang="en-US">{servant.id}</span>)
+                            </Link>
+                        </td>
+                        <td className="col-center">
+                            <ClassIcon className={servant.className} rarity={servant.rarity} height={50}/>
+                        </td>
+                        <td className="col-center">
+                            <Link to={route}>
+                                <img src={servant.face} alt={`${servant.name} face icon`} width={50} height={50} />
+                            </Link>
+                        </td>
+                        <td style={{ whiteSpace: Manager.showingJapaneseText() ? "nowrap": "normal" }}>
+                            <Link to={route}>
+                                {servant.name}
+                            </Link>
+                        </td>
+                        <td className="col-center">
+                            <RarityDescriptor rarity={servant.rarity}/>
+                        </td>
                     </tr>
-                    </thead>
-                    <tbody>
-                    {results.map((servant) => {
-                        const route = `/${this.props.region}/servant/${servant.collectionNo}`;
+                })
+                }
+                </tbody>
+            </Table>
 
-                        return <tr key={servant.id}>
-                            <td className="col-center">
-                                <Link to={route}>
-                                    {servant.collectionNo} (<span className="listing-svtId" lang="en-US">{servant.id}</span>)
-                                </Link>
-                            </td>
-                            <td className="col-center">
-                                <ClassIcon className={servant.className} rarity={servant.rarity} height={50}/>
-                            </td>
-                            <td className="col-center">
-                                <Link to={route}>
-                                    <img src={servant.face} alt={`${servant.name} face icon`} width={50} height={50} />
-                                </Link>
-                            </td>
-                            <td style={{ whiteSpace: Manager.showingJapaneseText() ? "nowrap": "normal" }}>
-                                <Link to={route}>
-                                    {servant.name}
-                                </Link>
-                            </td>
-                            <td className="col-center">
-                                <RarityDescriptor rarity={servant.rarity}/>
-                            </td>
-                        </tr>
-                    })
-                    }
-                    </tbody>
-                </Table>
-
-                {hasPaginator ? this.paginator(servants.length) : undefined}
+            {hasPaginator ? this.paginator(servants.length) : undefined}
             </div>
+            </>
         );
     }
 

@@ -98,30 +98,6 @@ const QuestListRender = ({ quests, region }: QuestListRenderProps) => {
                             </div>
                        </div>
                     ))}
-                    {/* <div id="name">
-                        <div className="war-questList-section-title">
-                            <span>Name</span>
-                        </div>
-                        {quests && quests.map((quest, i) => (
-                            <Quest key={i} quest={quest} />
-                        ))}    
-                    </div>
-                    <div id="scripts">
-                        <div className="war-questList-section-title">
-                            <span>Scripts</span>
-                        </div>
-                        <div className="war-scripts">
-                        {quests && quests.map((quest, i) => {
-                                return quest.phaseScripts
-                                    .map((phase) => (
-                                    <p>
-                                        <ScriptsQuest key={i} phase={phase} />
-                                    </p>
-                                ))
-                        })}
-                        </div>
-                    </div>
-                   */}
                 </section>
             </div>
         </>
