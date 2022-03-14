@@ -11,6 +11,7 @@ import FaceIcon from "../Component/FaceIcon";
 import Loading from "../Component/Loading";
 import RarityDescriptor from "../Descriptor/RarityDescriptor";
 import Manager from "../Setting/Manager";
+import Banner from "../Component/Banner";
 
 import './ListingPage.css';
 
@@ -228,7 +229,14 @@ class CraftEssencesPage extends React.Component<IProps, IState> {
 
         const pageNavigator = this.paginator(craftEssences.length);
 
+        const lastCraftEssences = craftEssences
+            .slice(0, 5)
+            .map(ce => `https://static.atlasacademy.io/JP/CharaGraph/${ce.id}/${ce.id}a.png`)
+
         return (
+            <>
+            
+            <Banner images={lastCraftEssences} type="images" title="Crafts Essences" />
             <div id='craft-essences' className="listing-page">
                 <Row>
                     <Col md={12} lg={6} xl={5} id="item-type">
@@ -338,6 +346,7 @@ class CraftEssencesPage extends React.Component<IProps, IState> {
 
                 {pageNavigator}
             </div>
+            </>
         );
     }
 }
