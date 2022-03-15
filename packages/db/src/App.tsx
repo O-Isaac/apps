@@ -1,19 +1,21 @@
-import {Region, Language, Ai} from "@atlasacademy/api-connector";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import React, {Suspense} from 'react';
-import {Container} from "react-bootstrap";
-import 'react-bootstrap-typeahead/css/Typeahead.css';
-import { Helmet, HelmetProvider } from 'react-helmet-async';
-import {BrowserRouter as Router, Route, Switch, Redirect} from "react-router-dom";
-import Api from "./Api";
+import React, { Suspense } from "react";
+import { Container } from "react-bootstrap";
+import { Helmet, HelmetProvider } from "react-helmet-async";
+import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 
-import "./App.css";
+import { Region, Language, Ai } from "@atlasacademy/api-connector";
+
+import Api from "./Api";
 import ErrorStatus from "./Component/ErrorStatus";
 import Loading from "./Component/Loading";
 import Navigation from "./Component/Navigation";
 import HomePage from "./Page/HomePage";
 import Manager from "./Setting/Manager";
-import {Theme} from "./Setting/Theme";
+import { Theme } from "./Setting/Theme";
+
+import "./App.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "react-bootstrap-typeahead/css/Typeahead.css";
 
 const AiPage = React.lazy(() => import("./Page/AiPage"));
 const BgmPage = React.lazy(() => import("./Page/BgmPage"));
@@ -25,14 +27,14 @@ const CommandCodePage = React.lazy(() => import("./Page/CommandCodePage"));
 const CommandCodesPage = React.lazy(() => import("./Page/CommandCodesPage"));
 const CraftEssencePage = React.lazy(() => import("./Page/CraftEssencePage"));
 const CraftEssencesPage = React.lazy(() => import("./Page/CraftEssencesPage"));
-const EnemyPage = React.lazy(() => import('./Page/EnemyPage'));
-const EnemyChangelogPage = React.lazy(() => import('./Page/EnemyChangelogPage'));
-const EntitiesPage = React.lazy(() => import('./Page/EntitiesPage'));
+const EnemyPage = React.lazy(() => import("./Page/EnemyPage"));
+const EnemyChangelogPage = React.lazy(() => import("./Page/EnemyChangelogPage"));
+const EntitiesPage = React.lazy(() => import("./Page/EntitiesPage"));
 const FaqPage = React.lazy(() => import("./Page/FaqPage"));
-const FuncPage = React.lazy(() => import('./Page/FuncPage'));
-const FuncsPage = React.lazy(() => import('./Page/FuncsPage'));
-const ItemPage = React.lazy(() => import('./Page/ItemPage'));
-const ItemsPage = React.lazy(() => import('./Page/ItemsPage'));
+const FuncPage = React.lazy(() => import("./Page/FuncPage"));
+const FuncsPage = React.lazy(() => import("./Page/FuncsPage"));
+const ItemPage = React.lazy(() => import("./Page/ItemPage"));
+const ItemsPage = React.lazy(() => import("./Page/ItemsPage"));
 const MasterMissionPage = React.lazy(() => import("./Page/MasterMissionPage"));
 const MasterMissionsPage = React.lazy(() => import("./Page/MasterMissionsPage"));
 const MysticCodePage = React.lazy(() => import("./Page/MysticCodePage"));
@@ -54,10 +56,10 @@ const WarPage = React.lazy(() => import("./Page/WarPage"));
 const WarsPage = React.lazy(() => import("./Page/WarsPage"));
 
 interface IState {
-    language: Language,
-    theme: Theme,
-    changelogVisibleOnly: boolean,
-    localTime: boolean
+    language: Language;
+    theme: Theme;
+    changelogVisibleOnly: boolean;
+    localTime: boolean;
 }
 
 const BASE_NAME = "/db";
@@ -69,7 +71,7 @@ class App extends React.Component<any, IState> {
             language: Manager.language(),
             theme: Manager.theme(),
             changelogVisibleOnly: Manager.changelogVisibleOnly(),
-            localTime: Manager.changelogLocalTimestamp()
+            localTime: Manager.changelogLocalTimestamp(),
         };
 
         for (const region of Object.values(Region)) {
@@ -85,7 +87,7 @@ class App extends React.Component<any, IState> {
     componentDidMount() {
         Manager.onUpdate(() => {
             Api.init(Manager.region(), Manager.language());
-            this.updateSettings()
+            this.updateSettings();
         });
     }
 
@@ -94,19 +96,16 @@ class App extends React.Component<any, IState> {
             language: Manager.language(),
             theme: Manager.theme(),
             changelogVisibleOnly: Manager.changelogVisibleOnly(),
-            localTime: Manager.changelogLocalTimestamp()
+            localTime: Manager.changelogLocalTimestamp(),
         });
     }
 
     render() {
         return (
             <HelmetProvider>
-            <Router basename={BASE_NAME}>
-                <Navigation
-                    language={this.state.language}
-                    theme={this.state.theme}
-                    />
-                <br/>
+                <Router basename={BASE_NAME}>
+                    <Navigation language={this.state.language} theme={this.state.theme} />
+                    <br />
 
                 <Container fluid="xl" id={'app'} key={`${this.state.language}`} lang={Manager.lang()}>
                     <Helmet>
