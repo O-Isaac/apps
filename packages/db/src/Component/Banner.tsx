@@ -1,56 +1,38 @@
+import { CSSProperties } from "react";
 import "./Banner.css";
 
 interface BannerProps {
-  title?: string;
-  description?: string;
-  images: string[];
-  type: "background" | "images";
+    title?: string;
+    description?: string;
+    image?: string;
+    background?: string;
 }
 
 export default function Banner(props: BannerProps) {
-  const { title, images, type } = props;
+    const { title, image, description, background } = props;
 
-  if (type === "images") {
+    let backgroundStyle: CSSProperties = {};
+
+    if (background) {
+        backgroundStyle = {
+            background: `
+              linear-gradient( rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2) ), 
+              url(${background}) center / cover no-repeat`,
+        };
+    }
+
     return (
-      <section className="banner-flex">
-        <div className="background-banner">
-          {images.map((src, index) => {
-            return (
-              <figure key={index}>
-                <img src={src} alt={"Banner Image #" + (index + 1)} />
-              </figure>
-            );
-          })}
-          <div id="dark-background" />
-
-          {title && (
-            <div id="page-title">
-              <h1>{title}</h1>
+        <section style={backgroundStyle} className="banner-container">
+            <div className="title">
+                <h1>{title}</h1>
+                {description && (
+                    <>
+                        <hr />
+                        <p>{description}</p>
+                    </>
+                )}
             </div>
-          )}
-        </div>
-      </section>
+            <div style={{ backgroundImage: `url(${image})` }} className="image-banner servant" />
+        </section>
     );
-  }
-
-  if (type === "background") {
-    return (
-      <section className="banner-flex">
-        <div className="background-banner">
-          <div
-            style={{ background: `url(${images[0]})` }}
-            id="dark-background"
-          />
-
-          {title && (
-            <div id="page-title">
-              <h1>{title}</h1>
-            </div>
-          )}
-        </div>
-      </section>
-    );
-  }
-
-  return null
 }
