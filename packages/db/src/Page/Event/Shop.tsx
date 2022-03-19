@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Alert, Button, ButtonGroup, Dropdown, Form, InputGroup, Table } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
-import { Item, Region, Shop } from "@atlasacademy/api-connector";
+import { Item, Quest, Region, Shop } from "@atlasacademy/api-connector";
 
 import ItemIcon from "../../Component/ItemIcon";
 import CondTargetNumDescriptor from "../../Descriptor/CondTargetNumDescriptor";
@@ -42,12 +42,13 @@ const IconLink = ({ region, item }: { region: Region; item: Item.Item }) => (
 interface IProps {
     region: Region;
     shops: Shop.Shop[];
-    itemMap: Map<number, Item.Item>;
+    itemCache: Map<number, Item.Item>;
     filters: Map<number, number>;
     onChange?: (record: Map<number, number>) => void;
+    questCache?: Map<number, Quest.QuestBasic>;
 }
 
-const ShopTab = ({ region, shops, itemMap, filters, onChange }: IProps) => {
+const ShopTab = ({ region, shops, filters, onChange, itemCache, questCache }: IProps) => {
     let [forceEnablePlanner, setForceEnablePlanner] = useState<boolean | undefined>(undefined);
     let [itemFilters, setItemFilters] = useState(new Set<number>());
 
@@ -186,7 +187,6 @@ const ShopTab = ({ region, shops, itemMap, filters, onChange }: IProps) => {
                         </th>
                         <th>Cost</th>
                         <th>Item</th>
-                        <th>Release Conditions</th>
                         <th>Set</th>
                         <th>Limit</th>
                         {shopEnabled && <th>Target</th>}
@@ -220,6 +220,28 @@ const ShopTab = ({ region, shops, itemMap, filters, onChange }: IProps) => {
                                         <div style={{ fontSize: "0.75rem" }} className="newline">
                                             {colorString(shop.detail)}
                                             <ScriptLink region={region} shop={shop} />
+                                            <br />
+                                            <div>
+                                                {shop.releaseConditions.length ? (
+                                                    <ul className="condition-list">
+                                                        {shop.releaseConditions.map((cond, index) => (
+                                                            <li key={index} style={{ fontSize: "0.75rem" }}>
+                                                                {cond.closedMessage && `${cond.closedMessage} — `}
+                                                                <CondTargetNumDescriptor
+                                                                    region={region}
+                                                                    cond={cond.condType}
+                                                                    targets={cond.condValues}
+                                                                    num={cond.condNum}
+                                                                    quests={questCache}
+                                                                    items={itemCache}
+                                                                />
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                ) : (
+                                                    ""
+                                                )}
+                                            </div>
                                         </div>
                                     </td>
                                     <td style={{ textAlign: "center" }}>
@@ -231,6 +253,7 @@ const ShopTab = ({ region, shops, itemMap, filters, onChange }: IProps) => {
                                         {shop.payType !== Shop.PayType.FREE ? shop.cost.amount.toLocaleString() : null}
                                     </td>
                                     <td>
+<<<<<<< HEAD
                                         <ShopPurchaseDescriptor region={region} shop={shop} itemMap={itemMap} />
                                     </td>
                                     <td style={{ textAlign: "center", width: "360px" }}>
@@ -252,6 +275,9 @@ const ShopTab = ({ region, shops, itemMap, filters, onChange }: IProps) => {
                                                 {index !== shop.releaseConditions.length - 1 ? "," : ""}
                                             </div>
                                         ))}
+=======
+                                        <ShopPurchaseDescriptor region={region} shop={shop} itemMap={itemCache} />
+>>>>>>> 6653cbbdd8b0d2ad954d06c97c6c72ddfa9280a7
                                     </td>
                                     <td style={{ textAlign: "center" }}>{shop.setNum.toLocaleString()}</td>
                                     <td style={{ textAlign: "center" }}>
