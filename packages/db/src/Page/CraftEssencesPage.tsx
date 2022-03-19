@@ -235,125 +235,130 @@ class CraftEssencesPage extends React.Component<IProps, IState> {
         const pageNavigator = this.paginator(craftEssences.length);
 
         const lastCraftEssences = craftEssences
-            .slice(0, 5)
-            .map(ce => `https://static.atlasacademy.io/JP/CharaGraph/${ce.id}/${ce.id}a.png`)
+            .slice(1, 2)
+            .map((ce) => `https://static.atlasacademy.io/JP/CharaGraph/${ce.id}/${ce.id}a.png`)[0];
 
         return (
             <>
-            
-            <Banner images={lastCraftEssences} type="images" title="Crafts Essences" />
-            <div id='craft-essences' className="listing-page">
-                <Row>
-                    <Col md={12} lg={6} xl={5} id="item-type">
-                        <ButtonGroup>
-                            {[
-                                [CEType.OTHER, "Regular CE"],
-                                [CEType.VALENTINE, "Valentine CE"],
-                                [CEType.BOND, "Bond CE"],
-                                [CEType.COMMEMORATIVE, "EXP CE"],
-                            ].map(([ceType, buttonText]) => {
+                <Banner image={lastCraftEssences} title="Crafts Essences" />
+                <div id="craft-essences" className="listing-page">
+                    <Row>
+                        <Col md={12} lg={6} xl={5} id="item-type">
+                            <ButtonGroup>
+                                {[
+                                    [CEType.OTHER, "Regular CE"],
+                                    [CEType.VALENTINE, "Valentine CE"],
+                                    [CEType.BOND, "Bond CE"],
+                                    [CEType.COMMEMORATIVE, "EXP CE"],
+                                ].map(([ceType, buttonText]) => {
+                                    return (
+                                        <Button
+                                            variant={
+                                                this.state.activeCETypeFilters.includes(ceType as CEType)
+                                                    ? "success"
+                                                    : "outline-dark"
+                                            }
+                                            key={ceType}
+                                            onClick={(_) => this.toggleCETypeFilter(ceType as CEType)}
+                                        >
+                                            {buttonText}
+                                        </Button>
+                                    );
+                                })}
+                            </ButtonGroup>
+                        </Col>
+                        <Col md={12} lg={3} id="item-search">
+                            <Form inline>
+                                <Form.Control
+                                    placeholder={"Search"}
+                                    value={this.state.search ?? ""}
+                                    onChange={(ev: ChangeEvent) => {
+                                        this.setState({ search: ev.target.value, page: 0 });
+                                    }}
+                                />
+                            </Form>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col sm={12} md={5} id="item-rarity">
+                            <ButtonGroup>
+                                {[...new Set(this.state.craftEssences.map((s) => s.rarity))]
+                                    // deduplicate star counts
+                                    .sort((a, b) => a - b)
+                                    // sort
+                                    .map((rarity) => (
+                                        <Button
+                                            variant={
+                                                this.state.activeRarityFilters.includes(rarity)
+                                                    ? "success"
+                                                    : "outline-dark"
+                                            }
+                                            key={rarity}
+                                            onClick={(_) => this.toggleRarityFilter(rarity)}
+                                        >
+                                            {rarity} ★
+                                        </Button>
+                                    ))}
+                            </ButtonGroup>
+                        </Col>
+                        <Col sm={12} md={7}>
+                            {pageNavigator}
+                        </Col>
+                    </Row>
+                    <hr />
+
+                    <Table striped bordered hover responsive>
+                        <thead>
+                            <tr>
+                                <th className="col-center">#</th>
+                                <th className="col-center">Thumbnail</th>
+                                <th>Name</th>
+                                <th className="col-center">Rarity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {results.map((craftEssence) => {
+                                const route = `/${this.props.region}/craft-essence/${craftEssence.collectionNo}`;
+
                                 return (
-                                    <Button
-                                        variant={
-                                            this.state.activeCETypeFilters.includes(ceType as CEType)
-                                                ? "success"
-                                                : "outline-dark"
-                                        }
-                                        key={ceType}
-                                        onClick={(_) => this.toggleCETypeFilter(ceType as CEType)}
-                                    >
-                                        {buttonText}
-                                    </Button>
+                                    <tr key={craftEssence.id}>
+                                        <td className="col-center">
+                                            <Link to={route}>
+                                                {craftEssence.collectionNo} (
+                                                <span className="listing-svtId" lang="en-US">
+                                                    {craftEssence.id}
+                                                </span>
+                                                )
+                                            </Link>
+                                        </td>
+                                        <td className="col-center">
+                                            <Link to={route}>
+                                                <FaceIcon
+                                                    type={Entity.EntityType.SERVANT_EQUIP}
+                                                    rarity={craftEssence.rarity}
+                                                    location={craftEssence.face}
+                                                    height={50}
+                                                />
+                                            </Link>
+                                        </td>
+                                        <td
+                                            style={{
+                                                whiteSpace: Manager.showingJapaneseText() ? "pre-wrap" : "normal",
+                                            }}
+                                        >
+                                            <Link to={route}>{craftEssence.name}</Link>
+                                        </td>
+                                        <td className="col-center">
+                                            <RarityDescriptor rarity={craftEssence.rarity} />
+                                        </td>
+                                    </tr>
                                 );
                             })}
-                        </ButtonGroup>
-                    </Col>
-                    <Col md={12} lg={3} id="item-search">
-                        <Form inline>
-                            <Form.Control
-                                placeholder={"Search"}
-                                value={this.state.search ?? ""}
-                                onChange={(ev: ChangeEvent) => {
-                                    this.setState({ search: ev.target.value, page: 0 });
-                                }}
-                            />
-                        </Form>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col sm={12} md={5} id="item-rarity">
-                        <ButtonGroup>
-                            {[...new Set(this.state.craftEssences.map((s) => s.rarity))]
-                                // deduplicate star counts
-                                .sort((a, b) => a - b)
-                                // sort
-                                .map((rarity) => (
-                                    <Button
-                                        variant={
-                                            this.state.activeRarityFilters.includes(rarity) ? "success" : "outline-dark"
-                                        }
-                                        key={rarity}
-                                        onClick={(_) => this.toggleRarityFilter(rarity)}
-                                    >
-                                        {rarity} ★
-                                    </Button>
-                                ))}
-                        </ButtonGroup>
-                    </Col>
-                    <Col sm={12} md={7}>
-                        {pageNavigator}
-                    </Col>
-                </Row>
-                <hr />
+                        </tbody>
+                    </Table>
 
-                <Table striped bordered hover responsive>
-                    <thead>
-                        <tr>
-                            <th className="col-center">#</th>
-                            <th className="col-center">Thumbnail</th>
-                            <th>Name</th>
-                            <th className="col-center">Rarity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {results.map((craftEssence) => {
-                            const route = `/${this.props.region}/craft-essence/${craftEssence.collectionNo}`;
-
-                            return (
-                                <tr key={craftEssence.id}>
-                                    <td className="col-center">
-                                        <Link to={route}>
-                                            {craftEssence.collectionNo} (
-                                            <span className="listing-svtId" lang="en-US">
-                                                {craftEssence.id}
-                                            </span>
-                                            )
-                                        </Link>
-                                    </td>
-                                    <td className="col-center">
-                                        <Link to={route}>
-                                            <FaceIcon
-                                                type={Entity.EntityType.SERVANT_EQUIP}
-                                                rarity={craftEssence.rarity}
-                                                location={craftEssence.face}
-                                                height={50}
-                                            />
-                                        </Link>
-                                    </td>
-                                    <td style={{ whiteSpace: Manager.showingJapaneseText() ? "pre-wrap" : "normal" }}>
-                                        <Link to={route}>{craftEssence.name}</Link>
-                                    </td>
-                                    <td className="col-center">
-                                        <RarityDescriptor rarity={craftEssence.rarity} />
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </Table>
-
-                {pageNavigator}
-            </div>
+                    {pageNavigator}
+                </div>
             </>
         );
     }

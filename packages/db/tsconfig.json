@@ -1,6 +1,9 @@
 {
     "compilerOptions": {
         "target": "es5",
+        "paths": {
+            "components/*": ["./src/Component/*"]
+        },
         "lib": ["dom", "dom.iterable", "esnext"],
         "allowJs": true,
         "skipLibCheck": true,
@@ -17,5 +20,5 @@
         "downlevelIteration": true,
         "noFallthroughCasesInSwitch": true
     },
-    "include": ["src"]
+    "include": ["src", "jsconfig.json"]
 }

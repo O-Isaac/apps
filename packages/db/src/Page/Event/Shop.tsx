@@ -215,7 +215,7 @@ const ShopTab = ({ region, shops, itemMap, filters, onChange }: IProps) => {
 
                             return (
                                 <tr key={shop.id}>
-                                    <td style={{ minWidth: "10em" }}>
+                                    <td style={{ minWidth: "14em" }}>
                                         <b>{shop.name}</b>
                                         <div style={{ fontSize: "0.75rem" }} className="newline">
                                             {colorString(shop.detail)}
@@ -233,7 +233,8 @@ const ShopTab = ({ region, shops, itemMap, filters, onChange }: IProps) => {
                                     <td>
                                         <ShopPurchaseDescriptor region={region} shop={shop} itemMap={itemMap} />
                                     </td>
-                                    <td style={{ textAlign: "center" }}>
+                                    <td style={{ textAlign: "center", width: "360px" }}>
+                                        {/* @ts-ignore */}
                                         {shop.releaseConditions.map((cond, index) => (
                                             <div key={`${cond.condType}-${cond.condValues[0]}-${cond.condValues[0]}`}>
                                                 {!["Unable to exchange, requirements not met", ""].includes(
@@ -247,6 +248,7 @@ const ShopTab = ({ region, shops, itemMap, filters, onChange }: IProps) => {
                                                     targets={cond.condValues}
                                                     num={cond.condNum}
                                                 />
+                                                {/* @ts-ignore */}
                                                 {index !== shop.releaseConditions.length - 1 ? "," : ""}
                                             </div>
                                         ))}
