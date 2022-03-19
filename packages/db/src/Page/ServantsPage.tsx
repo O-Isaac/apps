@@ -290,12 +290,7 @@ class ServantsPage extends React.Component<IProps, IState> {
 
         return (
             <>
-                <Banner
-                    background="https://static.atlasacademy.io/JP/Back/back10110.png"
-                    description="Latest information about servants!"
-                    image={lastServants}
-                    title="Servants"
-                />
+
                 <div id="servants" className="listing-page">
                     <Row>
                         <Col md={12} lg="auto" id="class-name">

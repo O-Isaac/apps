@@ -253,31 +253,7 @@ const ShopTab = ({ region, shops, filters, onChange, itemCache, questCache }: IP
                                         {shop.payType !== Shop.PayType.FREE ? shop.cost.amount.toLocaleString() : null}
                                     </td>
                                     <td>
-<<<<<<< HEAD
-                                        <ShopPurchaseDescriptor region={region} shop={shop} itemMap={itemMap} />
-                                    </td>
-                                    <td style={{ textAlign: "center", width: "360px" }}>
-                                        {/* @ts-ignore */}
-                                        {shop.releaseConditions.map((cond, index) => (
-                                            <div key={`${cond.condType}-${cond.condValues[0]}-${cond.condValues[0]}`}>
-                                                {!["Unable to exchange, requirements not met", ""].includes(
-                                                    cond.closedMessage
-                                                )
-                                                    ? `${cond.closedMessage} — `
-                                                    : ""}
-                                                <CondTargetNumDescriptor
-                                                    region={region}
-                                                    cond={cond.condType}
-                                                    targets={cond.condValues}
-                                                    num={cond.condNum}
-                                                />
-                                                {/* @ts-ignore */}
-                                                {index !== shop.releaseConditions.length - 1 ? "," : ""}
-                                            </div>
-                                        ))}
-=======
                                         <ShopPurchaseDescriptor region={region} shop={shop} itemMap={itemCache} />
->>>>>>> 6653cbbdd8b0d2ad954d06c97c6c72ddfa9280a7
                                     </td>
                                     <td style={{ textAlign: "center" }}>{shop.setNum.toLocaleString()}</td>
                                     <td style={{ textAlign: "center" }}>

@@ -104,9 +104,9 @@ class App extends React.Component<any, IState> {
         return (
             <HelmetProvider>
                 <Router basename={BASE_NAME}>
-                    <Navigation language={this.state.language} theme={this.state.theme} />
-                    <br />
-
+                <Navigation language={this.state.language} theme={this.state.theme} />
+                <main className="scrollbar-test">
+                <br />
                 <Container fluid="xl" id={'app'} key={`${this.state.language}`} lang={Manager.lang()}>
                     <Helmet>
                         {this.state.theme === Theme.DEFAULT ? null : (
@@ -458,6 +458,7 @@ class App extends React.Component<any, IState> {
                         <Route path="*" exact={true} component={ErrorStatus}/>
                     </Switch>
                 </Container>
+                </main>
             </Router>
             </HelmetProvider>
         );

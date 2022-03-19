@@ -240,7 +240,6 @@ class CraftEssencesPage extends React.Component<IProps, IState> {
 
         return (
             <>
-                <Banner image={lastCraftEssences} title="Crafts Essences" />
                 <div id="craft-essences" className="listing-page">
                     <Row>
                         <Col md={12} lg={6} xl={5} id="item-type">
